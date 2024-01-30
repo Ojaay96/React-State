@@ -1,56 +1,70 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
+import MovieList from "./components/MovieList";
+import Filter from "./components/Filter";
+import AddMovie from "./components/AddMovie";
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      person: {
-        fullName: "John James",
-        bio: "I'm a student of Full stack web development.",
-        imgSrc: "pic.jpg",
-        profession: "Electrical draftsman",
+const App = () => {
+  const [movies, setMovies] = useState([]);
+  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [filters, setFilters] = useState({ title: "", rating: "" });
+
+  useEffect(() => {
+    // You can fetch movies from an API or any other data source
+    // For the sake of example, let's assume you have a static list of movies
+    const staticMovies = [
+      {
+        title: "Legend Of The Seeker",
+        description:
+          "Legend of the Seeker is an American television series created by Sam Raimi, based on the fantasy novel series The Sword of Truth by Terry Goodkind.",
+        posterURL: "legend-of-the-seeker.jpg",
+        rating: 4.5,
       },
-      show: false,
-      mountTime: new Date(),
-    };
-  }
+      {
+        title: "Merlin",
+        description:
+          "Merlin is a mythical figure prominently featured in the legend of King Arthur and best known as a magician, with several other main roles.",
+        posterURL: "merlin.jpg",
+        rating: 5,
+      },
+      {
+        title: "Prison Break",
+        description:
+          "His brother, Lincoln Burrows, was convicted of a crime he didn't commit and put on Death Row.",
+        posterURL: "prison-break.jpg",
+        rating: 4.5,
+      },
+    ];
 
-  toggleShow = () => {
-    this.setState((prevState) => ({ show: !prevState.show }));
+    setMovies(staticMovies);
+    setFilteredMovies(staticMovies);
+  }, []);
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters({ ...filters, [filterType]: value });
+
+    // Apply filters to the movies
+    const filtered = movies.filter(
+      (movie) =>
+        movie.title.toLowerCase().includes(filters.title.toLowerCase()) &&
+        movie.rating.toString().includes(filters.rating)
+    );
+
+    setFilteredMovies(filtered);
   };
 
-  componentDidMount() {
-    this.interval = setInterval(() => {
-      this.setState({ mountTime: new Date() });
-    }, 1000);
-  }
+  const handleAddMovie = (newMovie) => {
+    setMovies([...movies, newMovie]);
+    handleFilterChange("title", filters.title); // Reapply filters after adding a new movie
+  };
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
-
-  render() {
-    const { person, show, mountTime } = this.state;
-
-    return (
-      <div className="App">
-        <h1>React State Checkpoint</h1>
-        <button onClick={this.toggleShow}>Toggle Profile</button>
-        {show && (
-          <div>
-            <h2>{person.fullName}</h2>
-            <p>{person.bio}</p>
-            <img src={person.imgSrc} alt={person.fullName} />
-            <p>Profession: {person.profession}</p>
-          </div>
-        )}
-        <p>
-          Time since mount: {Math.floor((new Date() - mountTime) / 1000)}{" "}
-          seconds
-        </p>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="app">
+      <Filter onFilterChange={handleFilterChange} />
+      <AddMovie />
+      <MovieList movies={filteredMovies} />
+      {/* You can add a component or form for adding new movies */}
+    </div>
+  );
+};
 
 export default App;
